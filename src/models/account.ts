@@ -8,6 +8,7 @@ import {
   asyncDeleteAccount,
   asyncUpdateDefaultAccountId,
   asyncUpdateAccount,
+  asyncUpdateAccountDefaultRepository,
 } from '@/actions/account';
 import { asyncChangeAccount } from '@/actions/clipper';
 import { message } from 'antd';
@@ -141,6 +142,22 @@ model.takeEvery(asyncUpdateAccount, function*(payload, { select, put, call }) {
   if (id === currentAccountId) {
     yield put.resolve(asyncChangeAccount.started({ id: newId }));
   }
+});
+
+model.takeEvery(asyncUpdateAccountDefaultRepository, function*({ accountId, repositoryId }, { select, call }) {
+  const accounts: AccountPreference[] = yield select((g: GlobalStore) => g.account.accounts);
+  const accountIndex = accounts.findIndex(o => o.id === accountId);
+  if (accountIndex < 0) {
+    return;
+  }
+  const result = update(accounts, {
+    [accountIndex]: {
+      defaultRepositoryId: {
+        $set: repositoryId,
+      },
+    },
+  });
+  yield call(syncStorageService.set, 'accounts', JSON.stringify(result));
 });
 
 export default model.build();

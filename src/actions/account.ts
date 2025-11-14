@@ -51,3 +51,8 @@ export const asyncUpdateAccount = actionCreator<{
   userInfo: UserInfo;
   callback(): void;
 }>('asyncUpdateAccount');
+
+export const asyncUpdateAccountDefaultRepository = actionCreator<{
+  accountId: string;
+  repositoryId: string;
+}>('asyncUpdateAccountDefaultRepository');

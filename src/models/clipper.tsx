@@ -9,6 +9,7 @@ import { CreateDocumentRequest, UnauthorizedError } from '@/common/backend/servi
 import { GlobalStore, ClipperStore } from '@/common/types';
 import { DvaModelBuilder, removeActionNamespace } from 'dva-model-creator';
 import update from 'immutability-helper';
+import { asyncUpdateAccountDefaultRepository } from '@/actions/account';
 import {
   selectRepository,
   initTabInfo,
@@ -285,6 +286,12 @@ const model = new DvaModelBuilder(defaultState, 'clipper')
       });
     }
   )
+  .takeEvery(selectRepository, function*({ repositoryId }, { select, put }) {
+    const currentAccountId: string = yield select((g: GlobalStore) => g.clipper.currentAccountId);
+    if (currentAccountId && repositoryId) {
+      yield put(asyncUpdateAccountDefaultRepository({ accountId: currentAccountId, repositoryId }));
+    }
+  })
   .case(selectRepository, (state, { repositoryId }) => {
     const currentRepository = state.repositories.find(o => o.id === repositoryId);
     const updateContext = backend.getImageHostingService()?.updateContext;

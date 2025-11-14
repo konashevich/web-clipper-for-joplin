@@ -81,6 +81,18 @@ module.exports = {
         ],
       },
       {
+        test: /\.css$/,
+        include: /node_modules[\\/](antd|@ant-design|@formily)/,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+          },
+        ],
+      },
+      {
         test: /\.(png|jpg|gif)$/,
         use: [
           {

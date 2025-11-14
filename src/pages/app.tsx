@@ -1,4 +1,4 @@
-import 'antd/dist/antd.less';
+import 'antd/dist/antd.css';
 import Container from 'typedi';
 import React from 'react';
 import dva, { router } from 'dva';
