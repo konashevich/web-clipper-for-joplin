@@ -26,6 +26,7 @@ import { asyncUpdateAccount } from '@/actions/account';
 import { channel } from 'redux-saga';
 import { IExtensionService, IExtensionContainer } from '@/service/common/extension';
 import { ExtensionType } from '@/extensions/common';
+import { setLastSelectedRepository } from '@/common/lastSelectedRepository';
 
 const defaultState: ClipperStore = {
   clipperHeaderForm: {
@@ -298,6 +299,14 @@ const model = new DvaModelBuilder(defaultState, 'clipper')
     if (currentRepository && updateContext) {
       updateContext({ currentRepository });
     }
+    
+    // Persist the last selected repository
+    if (state.currentAccountId) {
+      setLastSelectedRepository(state.currentAccountId, repositoryId).catch(err => {
+        console.error('Failed to persist last selected repository:', err);
+      });
+    }
+    
     return {
       ...state,
       currentRepository,

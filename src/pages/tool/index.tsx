@@ -25,6 +25,7 @@ import UserItem from '@/components/userItem';
 import { IContentScriptService } from '@/service/common/contentScript';
 import { IExtensionService, IExtensionContainer } from '@/service/common/extension';
 import { IExtensionWithId, InitContext } from '@/extensions/common';
+import { getLastSelectedRepository } from '@/common/lastSelectedRepository';
 
 const mapStateToProps = ({
   clipper: {
@@ -117,13 +118,28 @@ const Page = React.memo<PageProps>(
       repositoryId = currentRepository.id;
     }
     useEffect(() => {
-      if (currentAccount && currentAccount.defaultRepositoryId) {
+      if (currentAccount && repositories.length > 0) {
         if (repositoryId) {
           return;
         }
-        onRepositorySelect(currentAccount.defaultRepositoryId);
+        // Check for last selected repository first
+        getLastSelectedRepository(currentAccount.id)
+          .then(lastRepositoryId => {
+            if (lastRepositoryId && repositories.some(r => r.id === lastRepositoryId)) {
+              onRepositorySelect(lastRepositoryId);
+            } else if (currentAccount.defaultRepositoryId) {
+              onRepositorySelect(currentAccount.defaultRepositoryId);
+            }
+          })
+          .catch(error => {
+            console.error('Failed to load last selected repository:', error);
+            // Fallback to default on error
+            if (currentAccount.defaultRepositoryId) {
+              onRepositorySelect(currentAccount.defaultRepositoryId);
+            }
+          });
       }
-    }, [repositoryId, currentAccount, onRepositorySelect]);
+    }, [repositoryId, currentAccount, onRepositorySelect, repositories]);
 
     const push = (path: string) => dispatch(routerRedux.push(path));
 

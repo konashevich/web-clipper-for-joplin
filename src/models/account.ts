@@ -13,6 +13,7 @@ import {
 import { asyncChangeAccount } from '@/actions/clipper';
 import { message } from 'antd';
 import { getServices } from '@/common/backend';
+import { clearLastSelectedRepository } from '@/common/lastSelectedRepository';
 
 const initState: GlobalStore['account'] = {
   accounts: [],
@@ -82,6 +83,10 @@ model.takeEvery(asyncDeleteAccount.started, function*({ id }, { select, call }) 
   const accounts: AccountPreference[] = yield select((g: GlobalStore) => g.account.accounts);
   const defaultAccountId: string = yield select((g: GlobalStore) => g.account.defaultAccountId);
   const newAccounts = accounts.filter(o => o.id !== id);
+  
+  // Clean up last selected repository for the deleted account
+  yield call(clearLastSelectedRepository, id);
+  
   if (defaultAccountId === id) {
     if (newAccounts.length > 0) {
       yield call(syncStorageService.set, 'defaultAccountId', newAccounts[0].id);
